@@ -1,0 +1,185 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    background-color: #fdf1e0;
+}
+
+header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #a4502b;
+    color: #fff8f0;
+    padding: 8px 16px;
+    border-bottom: 4px solid #e08e45;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 20px;
+}
+
+#header-buttons button {
+    margin-left: 8px;
+}
+
+/* 暖色に上書き */
+.ui-button {
+    background: #e08e45 !important;
+    border: 1px solid #c96f2c !important;
+    color: #fff8f0 !important;
+}
+
+.ui-button:hover {
+    background: #d97c30 !important;
+}
+
+/* サイドバー　地図のレイアウト */
+#layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+}
+
+#sidebar {
+    width: 350px;
+    flex: 0 0 350px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 12px 8px;
+    background-color: #f6ddb8;
+}
+
+#map {
+    flex: 1 1 auto;
+    border-left: 4px solid #e08e45;
+}
+
+/* 付箋 */
+#accordion {
+    border: none;
+}
+
+#accordion .ui-accordion-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #ffdf7e;
+    border: 1px solid #e8c25c;
+    color: #5a3a1a;
+    font-family: 'Klee One', sans-serif;
+    font-weight: 600;
+    border-radius: 2px;
+    margin: 0 4px 18px 4px;
+    box-shadow: 2px 3px 6px rgba(90, 58, 26, 0.35);
+    transition: transform 0.15s;
+}
+
+/* 付箋の影 */
+#accordion .ui-accordion-header::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 0 16px 16px;
+    border-color: transparent transparent rgba(90, 58, 26, 0.25) transparent;
+}
+
+/* 付箋傾け */
+#accordion h3:nth-of-type(3n+1) { background: #ffdf7e; transform: rotate(-2deg); }
+#accordion h3:nth-of-type(3n+2) { background: #ffc98a; transform: rotate(2deg); }
+#accordion h3:nth-of-type(3n) { background: #ffb3a0; transform: rotate(-1deg); }
+
+/* 付箋開いたら戻す */
+#accordion h3.ui-accordion-header-active {
+    transform: rotate(0deg);
+}
+
+#accordion .ui-accordion-content {
+    background: #fffaf0;
+    border: 1px solid #e8c25c;
+    border-top: none;
+    margin: -14px 10px 18px 10px;
+    box-shadow: 1px 2px 4px rgba(90, 58, 26, 0.2);
+}
+
+.thumb-small {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    margin-right: 8px;
+    border-radius: 4px;
+    border: 2px solid #fff;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
+}
+
+.spot-panel img {
+    width: 100%;
+    max-width: 240px;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+    margin: 0 0 6px 0;
+    border-radius: 4px;
+}
+
+/* 説明文メモ帳の罫線 */
+.spot-panel p {
+    margin: 0;
+    padding: 6px 8px 10px 8px;
+    font-family: 'Klee One', sans-serif;
+    font-size: 14px;
+    line-height: 26px;
+    color: #5a3a1a;
+    background-image: repeating-linear-gradient(
+        #fffaf0 0px, #fffaf0 25px, #e0b876 26px
+    );
+    background-position: 0 4px;
+}
+
+/* 情報ウィンドウの中身 */
+.info-window h2 {
+    margin: 0 0 6px 0;
+    font-size: 16px;
+    color: #a4502b;
+}
+
+/* 写真は左、文章はすべて右側の列に収める */
+.info-window {
+    width: 380px;
+}
+
+.info-window .info-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.info-window img {
+    width: 160px;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+    flex: 0 0 160px;
+    border-radius: 4px;
+}
+
+.info-window p {
+    margin: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 13px;
+    line-height: 1.5;
+}
