@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>わが地元緑区の名所</title>
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
+
+    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCAKLjisxFelKwIl1_G6MiEO9-ya7Twr5s&callback=console.debug&libraries=maps,marker&v=beta">
+    </script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>わが地元緑区の名所</h1>
+        <div id="header-buttons">
+            <button id="fitAllBtn">全スポットを表示</button>
+        </div>
+    </header>
+
+    <div id="layout">
+        <div id="sidebar">
+            <div id="accordion"></div>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <script>
+        const spots = [
+            {
+                name: "有松の街道",
+                lat: 35.06764231008008,
+                lng: 136.9696074252421,
+                description: "慶長13年（1608年）、東海道の池鯉鮒宿と鳴海宿の間の宿場として開かれた町。竹田庄九郎が考案した「有松絞り」の産地として栄え、間口の広い絞商の主屋や門・塀が今も約800mにわたって続いている。国から「重要伝統的建造物群保存地区」に選定されており、令和元年には有松の文化・歴史を伝えるストーリーが「日本遺産」にも認定された。名鉄有松駅から徒歩約3分とアクセスも良い。",
+                photo: "images/arimatu.jpg"
+            },
+            {
+                name: "桶狭間古戦場公園",
+                lat: 35.05524252042263,
+                lng: 136.97124267550936,
+                description: "永禄3年（1560年）、織田信長がわずかな兵で今川義元の大軍を奇襲して打ち破った「桶狭間の戦い」の中心地とされる史跡公園。この場所は「田楽坪」とも呼ばれ、今川義元が最期を迎えた地と伝えられている。園内には合戦の様子を伝える石碑や案内板が設置されており、日本の歴史の転換点となった戦いの舞台を実際に歩いて感じることができる。",
+                photo: "images/okehazama.jpg"
+            },
+            {
+                name: "大高城跡",
+                lat: 35.06451519442125,
+                lng: 136.93628364920494,
+                description: "尾張国知多郡大高村（現在の緑区大高町）にあった城の跡。桶狭間の戦いの前哨戦として、当時今川方であった若き日の松平元康（後の徳川家康）が、この城に兵糧を運び入れた「兵糧入れ」の舞台として知られる。丸根砦・鷲津砦とともに昭和13年に国の史跡に指定され、現在は大高城址公園として整備されており、当時の堀や土橋の跡を見ることができる。JR大高駅から徒歩約10分。",
+                photo: "images/oodakajou.jpg"
+            },
+            {
+                name: "大高緑地",
+                lat: 35.06354894716246,
+                lng: 136.9547100842065,
+                description: "名古屋市緑区でも最大級の広さを誇る都市公園。春には多くの桜が咲き誇る花見の名所として知られるほか、大型遊具のある子どもの広場、夏季営業のプール、交通ルールを楽しく学べる交通公園、ジョギングコースなど施設が充実しており、一日を通して家族連れで楽しめるスポット。緑豊かな園内はピクニックや散策にもぴったり。",
+                photo: "images/oodakaryokuti.jpg"
+            },
+            {
+                name: "成海神社",
+                lat: 35.08655058195271,
+                lng: 136.95322838257775,
+                description: "日本武尊（やまとたけるのみこと）と宮簀媛命（みやずひめのみこと）を祀る、鳴海の地名の由来とも伝わる古社。平安時代の『延喜式』にも名前が載る式内社で、古くからこの地域の氏神として信仰されてきた。鳴海城跡公園からもほど近く、鳴海の高台に鎮座しており、鳥居や社殿など写真映えするスポットとしてもおすすめ。",
+                photo: "images/jinnja.jpg"
+            },
+            {
+                name: "中京競馬場",
+                lat: 35.06601940702959,
+                lng: 136.9875917705827,
+                description: "1953年に開設された、JRA（日本中央競馬会）の競馬場。GIレースの「高松宮記念」をはじめ数々の重賞レースが開催される、中部地方を代表する競馬場のひとつ。2012年には大規模なリニューアルが行われ、現代的な設備を備えている。厳密には隣接する豊明市にあるが、桶狭間古戦場公園のすぐ東側に位置しており、緑区エリアと合わせて訪れやすい。",
+                photo: "images/tyuukyoukeibajou.jpeg"
+            }
+        ];
+
+        let map;
+        let infoWindow;
+        const markers = [];
+
+        //情報ウィンドウの中身
+        function buildInfoContent(spot) {
+            return '<div class="info-window">' +
+                '<h2>' + spot.name + '</h2>' +
+                '<div class="info-body">' +
+                '<img src="' + spot.photo + '" alt="' + spot.name + '">' +
+                '<p>' + spot.description + '</p>' +
+                '</div>' +
+                '</div>';
+        }
+
+        //指定したスポットを地図の中心に移動　情報ウィンドウを開く
+        //マーカークリックと一覧クリックの両方から呼び出す
+        function showSpotOnMap(index) {
+            const spot = spots[index];
+            const marker = markers[index];
+            map.panTo(marker.getPosition());
+            map.setZoom(15);
+            infoWindow.setContent(buildInfoContent(spot));
+            infoWindow.open(map, marker);
+        }
+
+        //最初に開いたときのズーム・中心座標
+        //全スポットを表示ボタンもこの同じ値に戻す
+        const INITIAL_ZOOM = 13;
+        const INITIAL_CENTER = { lat: 35.0664, lng: 136.9567 };
+
+        //地図を最初に開いたときと同じ大きさ・位置に戻す
+        function resetMapView() {
+            map.setCenter(INITIAL_CENTER);
+            map.setZoom(INITIAL_ZOOM);
+        }
+
+        function initMap() {
+            //マップ
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: INITIAL_ZOOM,
+                center: INITIAL_CENTER,
+                zoomControl: true,
+                mapTypeControl: true,
+                streetViewControl: false
+            });
+
+            //情報ウィンドウは1つを使い回し
+            infoWindow = new google.maps.InfoWindow({ maxWidth: 420 });
+
+            //スポットの数だけマーカーを作る
+            spots.forEach((spot, index) => {
+                const marker = new google.maps.Marker({
+                    position: { lat: spot.lat, lng: spot.lng },
+                    map: map,
+                    title: spot.name
+                });
+                markers.push(marker);
+
+                //マーカークリック時に情報ウィンドウを開く＋左の一覧も連動して開く
+                marker.addListener("click", () => {
+                    showSpotOnMap(index);
+                    $("#accordion").accordion("option", "active", index);
+                });
+            });
+
+            //マップクリック時に情報ウィンドウを閉じる
+            map.addListener("click", () => {
+                infoWindow.close();
+            });
+
+            //全スポットを表示ボタン：最初に開いたときと同じ大きさ・位置に戻す
+            $("#fitAllBtn").on("click", () => {
+                infoWindow.close();
+                resetMapView();
+            });
+        }
+
+        //ページが読み込まれたら、左の一覧を作る
+        $(function() {
+            spots.forEach((spot, index) => {
+                const heading =
+                    '<h3 data-index="' + index + '">' +
+                    '<img class="thumb-small" src="' + spot.photo + '" alt="' + spot.name + '">' +
+                    spot.name +
+                    '</h3>';
+                const panel =
+                    '<div class="spot-panel">' +
+                    '<img src="' + spot.photo + '" alt="' + spot.name + '">' +
+                    '<p>' + spot.description + '</p>' +
+                    '</div>';
+                $("#accordion").append(heading).append(panel);
+            });
+
+            //アコーディオン化
+            $("#accordion").accordion({
+                collapsible: true,
+                active: false,
+                //見出しが開かれたときに、対応するスポットへ地図を移動する
+                activate: function(event, ui) {
+                    if (ui.newHeader.length) {
+                        const index = ui.newHeader.data("index");
+                        showSpotOnMap(index);
+                    }
+                }
+            });
+
+            $("#fitAllBtn").button();
+        });
+
+        //マップの初期化を待つ
+        window.initMap = initMap;
+        //マップの初期化が完了したら、マップを表示する
+        window.addEventListener("load", () => {
+            initMap();
+        });
+    </script>
+
+</body>
+
+</html>
